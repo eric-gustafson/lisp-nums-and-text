@@ -12,13 +12,19 @@
   monitoring.
 
 
+* Reference
+
+  [[http://dept-info.labri.fr/~strandh/Teaching/MTP/Common/David-Lamkins/chapter18.html][Logical Ops in Lisp]]
+
+  ldb, ash
+
 * Example Usage
 
 ** Dotted to sequence
   Turn dotted notation into a vector, increment the last octet and 
   turn it back into dotted.
+
 #+BEGIN_SRC lisp :exports both
-#+BEGIN_SRC lisp
   (trivia:match
       (nums-and-txt::dotted->vector "1.2.3.4")
     ((vector a b c d)
@@ -28,6 +34,7 @@
 #+RESULTS:
 : 1.2.3.5
 
+
 ** Numerical Reflection
 #+BEGIN_SRC lisp :exports both
   (num->dotted (octets->num (dotted->vector "1.2.3.4")))
@@ -36,13 +43,18 @@
 #+RESULTS:
 : 1.2.3.4
 
+
 ** Num to Octets
+   Num->octets converts a machine number into big-endian octet list
 #+BEGIN_SRC lisp
-   (num->octets 259)
+  (list (num->octets 259)
+        (num->octets 259 :length 4))
 #+END_SRC
 
 #+RESULTS:
-| 1 | 3 |
+| 1 | 3 |   |   |
+| 0 | 0 | 1 | 3 |
+
 
 ** Dotted to number
 #+BEGIN_SRC lisp :exports both
@@ -56,9 +68,25 @@
 
 
 
+** Edge Cases
+   Let's try and break things
+#+BEGIN_SRC lisp :exports both
+   (let ((num (octets->num (dotted->vector "255.255.255.255"))))
+     (incf num)
+     (num->octets num))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 0 | 0 | 0 | 0 |
+
+
+
+
+
+* Compare/Contrast
+** Bitsmasher
+
 * TODO Work
-  - [ ] num->octets is wrong
-  - [ ]  TODO put a couple of use cases in the readme
   - [ ] remove ip.lisp from snot
   - [ ] predicates for private address
   - [ ] range functions for private addresses

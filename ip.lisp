@@ -85,13 +85,31 @@ machine that is running the computation"
 into a number. x86 is little-endian.  RBPI is usually little-endian."
   (octets->num (dotted->vector str)) )
 
+(defun bits-needed (num)
+  "Calculates how many octets needed to store the number"
+  (loop
+     :for i integer :from 0
+     :while (> num 0)
+     :do (setf num (ash num -1))
+     :finally (return-from bits-needed i)
+     )
+  )
+
+(defun octets-needed (num)
+  (cond
+    ((= num 0) 1)
+    (t
+     (loop
+	:for i integer :from 0
+	:while (> num 0)
+	:do (setf num (ash num -8))
+	:finally (return-from octets-needed i)))))
+
 (defun _num->octets (num &key length)
   "Takes a lisp number (machine) and turns it into an octet vector in big-endian"
   (let* ((slen (cond
 		 (length length)
-		 (t
-		  (ceiling (/ (log num 2) 8))))
-	   )
+		 (t (octets-needed num))))
 	 (seq (make-array slen)))
     (loop :for i integer from 0
        :while (> num  0)
