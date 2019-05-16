@@ -1,0 +1,89 @@
+#+title: ip.lisp documentation and testing
+#+startup: overview
+
+* Summary 
+** Keyword Summary
+   
+   dotted *hw-numerical-type* parse-ip  
+
+
+** Executive Summary
+   Lot's of protocols are not 4 octets or 8 octets, so we are 
+   implementing such that we don't care about size
+
+
+* Terms and Definitions
+** Dynamic Variable *hw-numerical-type*
+   A dynamic variable that controls how IP addresses and numbers are
+   computed.
+
+   The code could be performing a computation for a target for
+   instance, and we want to ignore the integer-hw-type of the machine
+   that is doing the computation.
+
+
+* Parse an ip addresss
+** Vectors and lists
+** Strings
+*** Dotted
+**** dotted->host
+**** dotted->net
+
+**** parse-address
+    Lisp has a long history of parse-number, parse-int, parse-float ...
+*** Hex
+
+
+* Use Cases
+
+**  Parse a string IP address and increment the last octet.
+#+BEGIN_SRC lisp
+  (match
+      (snot::dotted-to-vector "1.2.3.4")
+    ((vector a b c d)
+     (addr->dotted (vector a b c (+ d 1)))))
+#+END_SRC
+
+#+RESULTS:
+: 1.2.3.5
+
+
+** num->octets
+#+BEGIN_SRC lisp
+   (num->dotted 1 :length 4)
+#+END_SRC
+
+#+RESULTS:
+| 1 | 0 | 0 | 0 |
+
+** Read in a dotted into a number. Inc it and then print it out
+#+BEGIN_SRC lisp
+  (let ((v (snot::dotted->num "1.2.3.33")))
+    (incf v)
+    (snot::num->dotted v))
+#+END_SRC
+
+
+
+* Tests
+** Parsing IP Addresses
+
+#+name: google-name-server
+#+BEGIN_SRC text
+8.8.8.8
+#+END_SRC
+
+
+#+name: ip1234
+#+begin_src text
+1.2.3.4
+#+end_src
+
+
+#+BEGIN_SRC lisp
+  (sockets:dotted-to-vector "1.2.3.4")
+#+END_SRC
+
+#+RESULTS:
+| 1 | 2 | 3 | 4 |
+
