@@ -46,7 +46,7 @@
 
 ** Num to Octets
    Num->octets converts a machine number into big-endian octet list
-#+BEGIN_SRC lisp
+#+BEGIN_SRC lisp  :exports both
   (list (num->octets 259)
         (num->octets 259 :length 4))
 #+END_SRC
@@ -64,7 +64,7 @@
 #+END_SRC
 
 #+RESULTS:
-: 9.3.2.1
+: 1.2.3.9
 
 
 
