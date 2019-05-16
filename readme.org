@@ -1,0 +1,28 @@
+#+title: Lisp, Numbers, and Text
+#+author: Eric Gustafson
+
+* Goal
+
+  To create a package that will make it easy to convert between
+  numerical objects and textual representations of those objects in
+  common lisp.
+
+  I'm using this package to work with numbers comming from a
+  POSIX/Unix systems for scripting, systems programming, and network
+  monitoring.
+
+* Example Usage
+
+#+BEGIN_SRC lisp :exports both
+#+BEGIN_SRC lisp
+  (match
+      (num-and-txt::dotted-to-vector "1.2.3.4")
+    ((vector a b c d)
+     (nums-and-txt::addr->dotted (vector a b c (+ d 1)))))
+#+END_SRC
+
+
+* Work
+** TODO create a working package for num&txt
+** TODO put a couple of use cases in the readme
+** TODO remove ip.lisp from snot

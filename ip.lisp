@@ -1,5 +1,5 @@
 ;;;; snot.lisp
-(in-package #:snot)
+(in-package #:nums-and-txt)
 
 (defvar *private-a-start* '(10 0 0 0))
 (defvar *private-a-end*   '(10 255 255 255))
@@ -36,6 +36,7 @@
 
 (defmethod print-ipaddr ((obj vector) stream)
   ;; only handles ipv4 at the moment
+  (labels ((doit (a b c d)
   (match
       obj
     ((vector a b c d)

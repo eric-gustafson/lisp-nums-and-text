@@ -6,7 +6,6 @@
    
    dotted *hw-numerical-type* parse-ip  
 
-
 ** Executive Summary
    Lot's of protocols are not 4 octets or 8 octets, so we are 
    implementing such that we don't care about size
@@ -37,12 +36,7 @@
 * Use Cases
 
 **  Parse a string IP address and increment the last octet.
-#+BEGIN_SRC lisp
-  (match
-      (snot::dotted-to-vector "1.2.3.4")
-    ((vector a b c d)
-     (addr->dotted (vector a b c (+ d 1)))))
-#+END_SRC
+
 
 #+RESULTS:
 : 1.2.3.5
