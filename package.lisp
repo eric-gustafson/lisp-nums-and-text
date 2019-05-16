@@ -5,5 +5,12 @@
   (:use #:cl #:alexandria #:serapeum
 	#:trivia)
   (:export
-   :fixnum-info)
+   :fixnum-info
+   :dotted->vector
+   :dotted->list
+   :parse-dotted
+
+   :dotted->num
+   :num->dotted
+   )
   )

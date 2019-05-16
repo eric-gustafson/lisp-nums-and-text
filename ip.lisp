@@ -9,14 +9,16 @@
   )
 
 (defun fixnum-info ()
-  "Returns :little-endian or :bigendian which should be found in the *features* list for the numerical disposition of hte hardware on the machine that is running the computation"
+  "Returns :little-endian or :bigendian which should be found in the
+*features* list for the numerical disposition of hte hardware on the
+machine that is running the computation"
   #+(or little-endian) (return-from fixnum-info :little-endian)
-  #+(or big-endian) (return-from fixnum-info :big-endian) )
+  #+(or big-endian) (return-from fixnum-info :big-endian)
+  )
 
 (defvar *hw-numerical-type* (fixnum-info)
   "A dynamic variable that controls how IP addresses and numbers are
   computed.
-
   The code could be performing a computation for a target for
   instance, and we want to ignore the integer-hw-type of the machine
   that is doing the computation."
@@ -75,41 +77,48 @@
   )
 
 (defun parse-dotted (str)
+  "Calles dotted->list"
   (dotted->list str))
 
 (defun dotted->num (str)
-  (octets->num (net-octets->host (dotted-to-vector str))) )
+  "Turn a dotted representation in network byte order (big-endian)
+into a number. x86 is little-endian.  RBPI is usually little-endian."
+  (octets->num (dotted->vector str)) )
 
 (defun _num->octets (num &key length)
-  "Takes a lisp number (machine) and turns it into an octet"
-  (reverse
-   (loop :for i integer from 0
-      :while (or (> num  0)
-		 (and (numberp length)
-		      (> length 0)))
-      :collect (ldb (byte 8 0) num)
-      :do (progn
-	    (setf num (ash num -8))
-	    (decf length))
-      )
-   ))
-
-(defun num->dotted (num &key length)
-  (format nil "~{~a~^.~}" (num->octets num :length length)))
+  "Takes a lisp number (machine) and turns it into an octet vector in big-endian"
+  (let* ((slen (cond
+		 (length length)
+		 (t
+		  (ceiling (/ (log num 2) 8))))
+	   )
+	 (seq (make-array slen)))
+    (loop :for i integer from 0
+       :while (> num  0)
+       :do
+       (setf (elt seq (- slen i 1)) (ldb (byte 8 0) num))
+       (setf num (ash num -8)) ;; shift right
+       )
+    seq)
+  )
+    
 
 (defun num->octets (num &key (endian :big-endian) length)
+  ;; (num->octets 259) => #(0 0 1 3)
+  ;; (num->octets 256 :endian :little) => #(3 1 0 0)
   ;; Defaults to network byte order
   "Takes a number and returns that number as a list of octets in either big or little endian"
   (ecase endian
     ((:big-endian :network :big :b :n :net)
-     #+(or big-endian) (_num->octets num :length length)
-     #+(or little-endian) (reverse (_num->octets num :length length))
+     (_num->octets num :length length)
      )
     ((:little-endian :little :l)
-     #+(or big-endian) (_num->octets num :length length)
-     #+(or little-endian) (reverse (_num->octets num :length length))
+     (reverse (_num->octets num :length length))
      )
-    )
+    ))
+
+(defun num->dotted (num &key length)
+  (format nil "~{~a~^.~}" (coerce (num->octets num :length length) 'list))
   )
 
 (defun nbo-octet->nbo-integer (octet-lst)
@@ -147,6 +156,9 @@
   (check-type seq sequence)
   ;; shift right
   (reduce #'(lambda(acc octet)
+	      ;; This is multiplication most places??  In C
+	      ;; bitwise-shifts are usually considered an arithmetic
+	      ;; operation, but not always? (worse is better)
 	      (setf acc (ash acc 8)) ;; shift left (up) 8
 	      (setf (ldb (byte 8 0) acc) octet)
 	      acc)
@@ -154,15 +166,15 @@
 	  :initial-value 0))
 
 (defun octets->num (oct-seq &key (endian :big-endian))
+  "Turn a series of octets into a machine number.  The endian keyword parameter describes the endianess of the oct-seq parameter."
+  (check-type oct-seq sequence)  
   (ecase
-      type
+      endian
     ((:big-endian :network :big :b :n :net)
-     #+(or big-endian) (_octets->num oct-seq)
-     #+(or little-endian) (_octets->num (reverse oct-seq))
+     (_octets->num  oct-seq)
      )
     ((:little-endian :little :l)
-     #+(or big-endian) (_octets->num (reverse oct-seq))
-     #+(or little-endian) (_octets->num oct-seq)
+     (_octets->num (reverse oct-seq))
      )
     )
   )
