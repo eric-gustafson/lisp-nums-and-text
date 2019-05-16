@@ -1,8 +1,12 @@
-;;;; snot.lisp
+;;;; ip.lisp
 (in-package #:nums-and-txt)
 
 (defvar *private-a-start* '(10 0 0 0))
 (defvar *private-a-end*   '(10 255 255 255))
+
+(defun private-a? (ipaddr)
+  "Is the IP address a private A?"
+  )
 
 (defun fixnum-info ()
   "Returns :little-endian or :bigendian which should be found in the *features* list for the numerical disposition of hte hardware on the machine that is running the computation"
@@ -10,14 +14,13 @@
   #+(or big-endian) (return-from fixnum-info :big-endian) )
 
 (defvar *hw-numerical-type* (fixnum-info)
-  "  A dynamic variable that controls how IP addresses and numbers are
+  "A dynamic variable that controls how IP addresses and numbers are
   computed.
 
   The code could be performing a computation for a target for
   instance, and we want to ignore the integer-hw-type of the machine
   that is doing the computation."
   )
-
 
 (defmethod addr->dotted ((obj list))
   "Convert the address into dotted string"
@@ -34,27 +37,26 @@
 	 :do (princ (elt obj i)))
       )))
 
-(defmethod print-ipaddr ((obj vector) stream)
+(defun print-ipaddr (obj stream)
   ;; only handles ipv4 at the moment
   (labels ((doit (a b c d)
-  (match
-      obj
-    ((vector a b c d)
-     (print-unreadable-object
-	 (obj stream :type t)
-       (format stream "~a.~a.~a.~a" a b c d)
-       ))
-    (otherwise
-     (error "Illegal IP Vector value ~a" obj)))
+	     (print-unreadable-object
+		 (obj stream :type t)
+	       (format stream "~a.~a.~a.~a" a b c d)
+	       )))
+    (trivia:match
+	obj
+      ((vector a b c d) (doit a b c d))
+      ((list a b c d) (doit a b c d))
+      (otherwise
+       (error "Unexpected parameter ~a" obj)))
+    )
   )
 
 (defun na->list (n)
   ;; Takes a native integer fixnum, like from a packet sniffer
   (loop for i from 0 upto 3
      collect (ldb (byte 8 (* 8 i)) n)))
-
-(defun na->dotted-string (n)
-  (sockets:integer-to-dotted n))
 
 (defun dotted->vector (str)
   "Take a number in dotted notation and return a vector representation."
@@ -95,7 +97,6 @@
 (defun num->dotted (num &key length)
   (format nil "~{~a~^.~}" (num->octets num :length length)))
 
-
 (defun num->octets (num &key (endian :big-endian) length)
   ;; Defaults to network byte order
   "Takes a number and returns that number as a list of octets in either big or little endian"
@@ -109,30 +110,6 @@
      #+(or little-endian) (reverse (_num->octets num :length length))
      )
     )
-  )
-
-(defun htoa(haddr-uint32)
-  "take a uint32 in host byte order and turn it into an ip address string"
-  (let ((A (gethash haddr-uint32 *htoa-cache*)))
-    (unless (stringp A)
-      (setf A (handler-case
-		  (multiple-value-bind
-			(ipaddress more-addresses canonical-name more-hostnames)
-		      (sockets:lookup-hostname haddr-uint32)
-		    canonical-name)
-		(resolver-fail-error ()
-		  (sockets:integer-to-dotted haddr-uint32))
-		(resolver-no-name-error ()
-		  (sockets:integer-to-dotted haddr-uint32))))
-      (setf (gethash haddr-uint32 *htoa-cache*) A))
-    A))
-
-
-(defun ntoa (naddr)
-  "Takes an ipv4 network address (4 bytes) and returns the hostname.
-This will cache the value for an extended amount of time.  This will
-also handle any errors from the dns resolver."
-  (htoa (swap-bytes:ntohl naddr))
   )
 
 (defun nbo-octet->nbo-integer (octet-lst)
@@ -152,7 +129,6 @@ also handle any errors from the dns resolver."
   #-(or little-endian)(string->octet-list d)
   #+(or little-endian)(reverse (string->octet-list str))
   )
-
 
 (defun net-octets->host-octets (seq)
   "network byte order is just reversing an octect list"
@@ -190,7 +166,6 @@ also handle any errors from the dns resolver."
      )
     )
   )
-			     
 
 (defun string->octet-list (str)
   (declare (type string str))
@@ -217,7 +192,6 @@ also handle any errors from the dns resolver."
      #'(lambda(ostr)
 	 (parse-integer ostr :radix 16))
      str-seq)))
-
 
 (defun hexstring->ip-addr (str)
   ;; I don't know if /proc outputs NBO or whatever the machine has.

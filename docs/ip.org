@@ -81,3 +81,34 @@
 #+RESULTS:
 | 1 | 2 | 3 | 4 |
 
+
+* Development
+#+BEGIN_SRC lisp
+  (ql:quickload :sockets)
+(defun na->dotted-string (n)
+  (sockets:integer-to-dotted n))
+
+(defun htoa(haddr-uint32)
+  "take a uint32 in host byte order and turn it into an ip address string"
+  (let ((A (gethash haddr-uint32 *htoa-cache*)))
+    (unless (stringp A)
+      (setf A (handler-case
+		  (multiple-value-bind
+			(ipaddress more-addresses canonical-name more-hostnames)
+		      (sockets:lookup-hostname haddr-uint32)
+		    canonical-name)
+		(resolver-fail-error ()
+		  (sockets:integer-to-dotted haddr-uint32))
+		(resolver-no-name-error ()
+		  (sockets:integer-to-dotted haddr-uint32))))
+      (setf (gethash haddr-uint32 *htoa-cache*) A))
+    A))
+
+(defun ntoa (naddr)
+  "Takes an ipv4 network address (4 bytes) and returns the hostname.
+This will cache the value for an extended amount of time.  This will
+also handle any errors from the dns resolver."
+  (htoa (swap-bytes:ntohl naddr))
+  )
+
+#+END_SRC

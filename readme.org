@@ -11,18 +11,24 @@
   POSIX/Unix systems for scripting, systems programming, and network
   monitoring.
 
+
 * Example Usage
 
 #+BEGIN_SRC lisp :exports both
 #+BEGIN_SRC lisp
-  (match
-      (num-and-txt::dotted-to-vector "1.2.3.4")
+  (trivia:match
+      (nums-and-txt::dotted->vector "1.2.3.4")
     ((vector a b c d)
      (nums-and-txt::addr->dotted (vector a b c (+ d 1)))))
 #+END_SRC
+
+#+RESULTS:
+: 1.2.3.5
 
 
 * Work
 ** TODO create a working package for num&txt
 ** TODO put a couple of use cases in the readme
 ** TODO remove ip.lisp from snot
+** TODO predicates for private address
+*** TODO range functions for private addresses

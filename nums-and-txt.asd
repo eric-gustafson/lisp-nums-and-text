@@ -1,6 +1,6 @@
 ;; nums-and-txt.asd
 (asdf:defsystem #:nums-and-txt
-  :name ""
+  :name "Nums and Text"
   :description ""
   :author "gustafson.e.gordon@gmail.com"
   :licence "GPL v3"
@@ -11,4 +11,6 @@
 	       #:serapeum
 	       #:trivia
 	       #:closer-mop)
+  :serial t
+  :components ((:file "ip"))
   )
