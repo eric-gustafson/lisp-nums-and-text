@@ -5,11 +5,15 @@
   (:use #:cl #:alexandria #:serapeum
 	#:trivia)
   (:export
+   
    :fixnum-info
+
    :dotted->vector
    :dotted->list
    :parse-dotted
 
+   :addr->dotted
+   
    :dotted->num
    :num->dotted
 

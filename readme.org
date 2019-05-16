@@ -26,9 +26,9 @@
 
 #+BEGIN_SRC lisp :exports both
   (trivia:match
-      (nums-and-txt::dotted->vector "1.2.3.4")
+      (nums-and-txt:dotted->vector "1.2.3.4")
     ((vector a b c d)
-     (nums-and-txt::addr->dotted (vector a b c (+ d 1)))))
+     (nums-and-txt:addr->dotted (vector a b c (+ d 1)))))
 #+END_SRC
 
 #+RESULTS:
