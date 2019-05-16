@@ -120,7 +120,6 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     seq)
   )
     
-
 (defun num->octets (num &key (endian :big-endian) length)
   ;; (num->octets 259) => #(0 0 1 3)
   ;; (num->octets 256 :endian :little) => #(3 1 0 0)
@@ -134,6 +133,15 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
      (reverse (_num->octets num :length length))
      )
     ))
+
+(defun hexstring->octets (str)
+  (let ((ours (copy-sequence 'string str)))
+    (mapcar
+     #'(lambda(hstr)
+	 (parse-integer hstr :radix 16))
+     (serapeum:batches (delete-if #'(lambda(c) (find c (vector #\:))) ours) 2))
+    )
+  )
 
 (defun num->dotted (num &key length)
   (format nil "~{~a~^.~}" (coerce (num->octets num :length length) 'list))
@@ -222,6 +230,8 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
      #'(lambda(ostr)
 	 (parse-integer ostr :radix 16))
      str-seq)))
+
+
 
 (defun hexstring->ip-addr (str)
   ;; I don't know if /proc outputs NBO or whatever the machine has.

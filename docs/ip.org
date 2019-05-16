@@ -32,14 +32,9 @@
     Lisp has a long history of parse-number, parse-int, parse-float ...
 *** Hex
 
-
 * Use Cases
 
 **  Parse a string IP address and increment the last octet.
-
-
-#+RESULTS:
-: 1.2.3.5
 
 
 ** num->octets
@@ -48,16 +43,17 @@
 #+END_SRC
 
 #+RESULTS:
-| 1 | 0 | 0 | 0 |
+: 0.0.0.1
 
 ** Read in a dotted into a number. Inc it and then print it out
 #+BEGIN_SRC lisp
-  (let ((v (snot::dotted->num "1.2.3.33")))
+  (let ((v (dotted->num "1.2.3.33")))
     (incf v)
-    (snot::num->dotted v))
+    (num->dotted v))
 #+END_SRC
 
-
+#+RESULTS:
+: 1.2.3.34
 
 * Tests
 ** Parsing IP Addresses
@@ -83,6 +79,8 @@
 
 
 * Development
+
+** Xtras
 #+BEGIN_SRC lisp
   (ql:quickload :sockets)
 (defun na->dotted-string (n)
@@ -112,3 +110,5 @@ also handle any errors from the dns resolver."
   )
 
 #+END_SRC
+
+

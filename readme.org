@@ -18,6 +18,7 @@
 
   ldb, ash
 
+
 * Example Usage
 
 ** Dotted to sequence
@@ -79,6 +80,73 @@
 #+RESULTS:
 | 1 | 0 | 0 | 0 | 0 |
 
+
+
+
+
+** /proc/net/route
+
+*** Shell
+   Read in the IP addresses from /proc/net/route
+
+   From the command line, display what we get.  *Notice* that the
+   values are in *little-endian* order.
+#+name: procfs-route
+#+BEGIN_SRC sh
+  cat /proc/net/route
+#+END_SRC
+
+#+RESULTS:
+| Iface  | Destination | Gateway  | Flags | RefCnt | Use | Metric | Mask     |   | MTU | Window | IRTT |
+| xenbr0 | 0           | 20C818AC |     3 |      0 |   0 |      0 | 0        | 0 |   0 |      0 |      |
+| xenbr0 | 00C818AC    | 0        |     1 |      0 |   0 |      0 | 00FFFFFF | 0 |   0 |      0 |      |
+
+#+BEGIN_SRC sh
+  ip route
+#+END_SRC
+
+#+RESULTS:
+| default         | via | 172.24.200.32 | dev   | xenbr0 |       |      |     |                |
+| 172.24.200.0/24 | dev |        xenbr0 | proto | kernel | scope | link | src | 172.24.200.210 |
+
+
+*** Lisp
+Read in the values using a little lisp program.
+
+#+name: machine-hex
+#+BEGIN_SRC lisp
+  (defun parse-machine-hex (raw-hex)
+    (octets->num (hexstring->octets raw-hex) :endian (fixnum-info))
+    )
+#+END_SRC
+
+#+RESULTS: machine-hex
+: PARSE-MACHINE-HEX
+
+#+name: procfs-lines
+#+BEGIN_SRC lisp :results table :exports both
+  (with-open-file
+      (iport #P"/proc/net/route")
+    (read-line iport nil nil)
+    (loop :with rl = nil
+       :for  x = (read-line iport nil nil) 
+       :while x
+       :do
+       (trivia:match
+           (ppcre:split "\\s+" x)
+         ((list* iface dest gateway flags refcnt use metric mask blank mtu window)
+          (push (loop :for x in (list dest gateway mask)
+                   :collect x
+                   ;;:collect (parse-machine-hex x)
+                   :collect (num->dotted (parse-machine-hex x)))
+                rl)))
+       :finally (return rl))
+    )
+#+END_SRC
+
+#+RESULTS: procfs-lines
+| 00C818AC | 2887305216 | 172.24.200.0 | 00000000 |          0 |             0 | 00FFFFFF | 4294967040 | 255.255.255.0 |
+| 00000000 |          0 |            0 | 20C818AC | 2887305248 | 172.24.200.32 | 00000000 |          0 |             0 |
 
 
 
