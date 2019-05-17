@@ -70,7 +70,7 @@
 
 
 
-** Edge Cases
+** Breaking the 32bit boundry
    Let's try and break things
 #+BEGIN_SRC lisp :exports both
    (let ((num (octets->num (dotted->vector "255.255.255.255"))))
