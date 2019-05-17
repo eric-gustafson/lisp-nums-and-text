@@ -246,3 +246,8 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
        ))
   )
 
+(defun parse-machine-hex (raw-hex)
+  "Return a number for the hex string. Calls parse-integer to do the
+actual parsing.  See also: hexstring->octets, parse-integer"
+  (octets->num (hexstring->octets raw-hex) :endian (fixnum-info))
+  )

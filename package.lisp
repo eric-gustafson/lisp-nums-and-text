@@ -17,5 +17,8 @@
    :num->dotted
 
    :octets-needed
+   
+   :hexstring->octets
+   :parse-machine-hex
    )
   )

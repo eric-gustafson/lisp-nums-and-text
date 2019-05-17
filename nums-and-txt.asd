@@ -12,5 +12,6 @@
 	       #:trivia
 	       #:closer-mop)
   :serial t
-  :components ((:file "ip"))
+  :components ((:file "package")
+	       (:file "ip"))
   )
