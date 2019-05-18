@@ -20,5 +20,10 @@
    
    :hexstring->octets
    :parse-machine-hex
+
+   :private-a?
+
+   :octets->num
+   :read-octets
    )
   )

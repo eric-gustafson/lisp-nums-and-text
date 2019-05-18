@@ -1,13 +1,6 @@
 ;;;; ip.lisp
 (in-package #:nums-and-txt)
 
-(defvar *private-a-start* '(10 0 0 0))
-(defvar *private-a-end*   '(10 255 255 255))
-
-(defun private-a? (ipaddr)
-  "Is the IP address a private A?"
-  )
-
 (defun fixnum-info ()
   "Returns :little-endian or :bigendian which should be found in the
 *features* list for the numerical disposition of hte hardware on the
@@ -251,3 +244,28 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 actual parsing.  See also: hexstring->octets, parse-integer"
   (octets->num (hexstring->octets raw-hex) :endian (fixnum-info))
   )
+
+
+(defvar *a-start* (octets->num '(10 0 0 0)))
+(defvar *a-end*   (octets->num '(10 255 255 255)))
+
+;; A	10.0.0.0 to 10.255.255.255	255.0.0.0
+;; B	172.16.0.0 to 172.31.255.255	255.240.0.0
+;; C	192.168.0.0 to 192.168.255.255	255.255.0.0
+
+(defun private-a? (ipaddr)
+  "Is the IP address a private A?"
+  (trivia:match
+      ipaddr
+    ((guard x (numberp x))
+     (and (>= ipaddr *a-start*)
+	  (<= ipaddr *a-end*)))
+    ((guard x (or (list x) (vector x)))
+     (private-a? (octets->num x)))
+    (otherwise
+     (error "Unexpected parameter ~a" ipaddr)))
+  )
+
+
+(defun read-octets (n stream)
+  (loop :for i :below n :collect (read-byte stream)))

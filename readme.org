@@ -81,10 +81,6 @@
 #+RESULTS:
 | 1 | 0 | 0 | 0 | 0 |
 
-
-
-
-
 ** /proc/net/route
    
 *** COMMENT Shell
@@ -150,4 +146,6 @@
 * COMMENT Work
 ** TODO remove ip.lisp from snot
 ** TODO predicates for private address
+   <2019-05-16 Thu> I've put in a reference. Create a macro that will
+   create for all 3 ranges.
 ** TODO range functions for private addresses
