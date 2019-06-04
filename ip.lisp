@@ -151,6 +151,12 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
        (setf (ldb (byte 8 (* i 8)) nbo-num) x))
     nbo-num))
 
+(defun nbo-hex-string (hex)
+  (loop :for i :from 0 :by 2 :upto 6
+     :collect
+     (parse-integer (subseq hex i (+ i 2)) :radix 16))
+  )
+
 (defun machine-fixnum-string->octet-list (str)
   ;; convert a string into a sequnce of octets.  The string is in
   ;; machine order.
@@ -224,8 +230,6 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 	 (parse-integer ostr :radix 16))
      str-seq)))
 
-
-
 (defun hexstring->ip-addr (str)
   ;; I don't know if /proc outputs NBO or whatever the machine has.
   ;; Does /proc display the same values on bigendian as it does on
@@ -266,6 +270,7 @@ actual parsing.  See also: hexstring->octets, parse-integer"
      (error "Unexpected parameter ~a" ipaddr)))
   )
 
-
 (defun read-octets (n stream)
   (loop :for i :below n :collect (read-byte stream)))
+
+

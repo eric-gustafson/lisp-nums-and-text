@@ -26,5 +26,10 @@
    :octets->num
    :num->octets
    :read-octets
+
+   :string->octet-list
+   
+   :nbo-hex-string
+   :nbo-octet->nbo-integer
    )
   )
