@@ -32,6 +32,9 @@ machine that is running the computation"
 	 :do (princ (elt obj i)))
       )))
 
+(defmethod addr->dotted ((obj number))
+  (addr->dotted (num->octets obj)))
+
 (defun print-ipaddr (obj stream)
   ;; only handles ipv4 at the moment
   (labels ((doit (a b c d)
