@@ -31,5 +31,15 @@
    
    :nbo-hex-string
    :nbo-octet->nbo-integer
+
+   :read-uint8
+   :write-uint8
+   :write-uint16
+   :write-uint32
+   :write-uint64
+   :read-uint8
+   :read-uint16
+   :read-uint32
+   :read-uint64
    )
   )
