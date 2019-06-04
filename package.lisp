@@ -1,5 +1,5 @@
 ;;;; Package.lisp 
-(defpackage #:nums-and-txt
+(defpackage #:numex
   (:shadowing-import-from #:trivia @)
   (:use #:cl #:alexandria #:serapeum
 	#:trivia)

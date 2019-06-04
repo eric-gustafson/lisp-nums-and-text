@@ -1,5 +1,5 @@
 ;;;; ip.lisp
-(in-package #:nums-and-txt)
+(in-package #:numex)
 
 (defun fixnum-info ()
   "Returns :little-endian or :bigendian which should be found in the

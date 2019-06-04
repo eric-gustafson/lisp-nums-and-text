@@ -1,6 +1,6 @@
-;; nums-and-txt.asd
-(asdf:defsystem #:nums-and-txt
-  :name "Nums and Text"
+;; numex.asd
+(asdf:defsystem #:numex
+  :name "Numerical Exchange"
   :description ""
   :author "gustafson.e.gordon@gmail.com"
   :licence "GPL v3"
