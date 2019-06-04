@@ -273,4 +273,46 @@ actual parsing.  See also: hexstring->octets, parse-integer"
 (defun read-octets (n stream)
   (loop :for i :below n :collect (read-byte stream)))
 
+(defmacro gen-num-writers (name num-octets)
+  (let ((function-name (intern (string-upcase (format nil "write-~a" name))))
+	(seq-write (intern (string-upcase (format nil "write-~a-to-seq" name))))
+	)
+    `(progn
+       (defmethod ,seq-write ((num number)   &key (endian *hw-numerical-type*))
+	   (num->octets num :endian endian :length ,num-octets))
+       (defmethod ,function-name ((out-stream stream) (num number)  &key (endian *hw-numerical-type*))
+	 (write-sequence (num->octets num :endian endian :length ,num-octets) out-stream))))
+  )
+
+(defmacro gen-num-reader (name num-octets)
+  (let ((function-name (intern (string-upcase (format nil "read-~a" name))))
+	)
+    `(progn
+       (defmethod ,function-name ((port stream) &key (endian :big-endian))
+	 (let ((buff (make-array ,num-octets)))
+	   (read-sequence buff port)
+	   (octets->num buff :endian endian)))
+       (defmethod ,function-name ((seq sequence) &key (endian :big-endian))
+	 (let ((buff (subseq seq 0 ,num-octets)))
+	   (values (octets->num buff :endian endian)
+		   (subseq seq ,num-octets))))
+       )
+    ))
+
+(defmacro defnumrw (num-octets)
+  (cons
+   'progn
+   (loop :with i = 1
+      :while (<= i num-octets)
+      :collect (let ((intdef (intern (string-upcase (format nil "uint~a" (* 8 i))))))
+		 `(progn
+		    (gen-num-reader ,intdef ,i)
+		    (gen-num-writers ,intdef ,i)))
+      :do (setf i (* i 2))
+      )
+   )
+  )
+
+(defnumrw 8)
+  
 
