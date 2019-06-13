@@ -10,6 +10,7 @@
   :depends-on (#:alexandria
 	       #:serapeum
 	       #:trivia
+	       #:trivia.ppcre
 	       #:closer-mop)
   :serial t
   :components ((:file "package")

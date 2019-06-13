@@ -56,13 +56,38 @@ machine that is running the computation"
   (loop for i from 0 upto 3
      collect (ldb (byte 8 (* 8 i)) n)))
 
+(defvar *ip-cidr-scanner*
+  (ppcre:create-scanner
+   '(:sequence
+       (:register (:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+			     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+			     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+			     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) ))
+       #\/
+       (:GREEDY-REPETITION 1 NIL :DIGIT-CLASS))))
+
+(defvar *ip-scanner*
+  (ppcre:create-scanner
+   '(:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS))))
+  
 (defun dotted->vector (str)
   "Take a number in dotted notation and return a vector representation."
   (declare (type string str))
-  (let ((v (serapeum:vect)))
-    (loop :for num string in (split-sequence #\. str)
-       :do (vector-push-extend  (parse-integer num) v))
-    v
+  (trivia:match
+      str
+    ((trivia.ppcre:ppcre (*ip-cidr-scanner*) ip)
+     ;; 172.21.18.6/24
+     (dotted->vector ip))
+    ((trivia.ppcre:ppcre (*ip-scanner*))
+     (let ((v (serapeum:vect)))
+       (loop :for num string in (split-sequence #\. str)
+	  :do (vector-push-extend  (parse-integer num) v))
+       v
+       )
+     )
     )
   )
 

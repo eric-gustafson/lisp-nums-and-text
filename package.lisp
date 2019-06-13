@@ -2,7 +2,8 @@
 (defpackage #:numex
   (:shadowing-import-from #:trivia @)
   (:use #:cl #:alexandria #:serapeum
-	#:trivia)
+	#:trivia
+	)
   (:export
    
    :fixnum-info
