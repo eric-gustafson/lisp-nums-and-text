@@ -42,5 +42,9 @@
    :read-uint16
    :read-uint32
    :read-uint64
+
+   :*ip-cidr-scanner*
+   :*ip-scanner*
+   :make-cidr-mask
    )
   )

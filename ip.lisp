@@ -56,29 +56,38 @@ machine that is running the computation"
   (loop for i from 0 upto 3
      collect (ldb (byte 8 (* 8 i)) n)))
 
-(defvar *ip-cidr-scanner*
+(defun make-cidr-mask (ncidr-bits)
+  (loop
+     :with mask = #x80000000
+     :repeat (- ncidr-bits 1)
+     :do
+     (setf mask (logior mask (ash mask -1)))
+     :finally (return mask)))
+
+(defparameter *ip-cidr-scanner*
   (ppcre:create-scanner
    '(:sequence
-       (:register (:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
-			     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
-			     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
-			     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) ))
-       #\/
-       (:GREEDY-REPETITION 1 NIL :DIGIT-CLASS))))
+     (:register (:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+		 (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+		 (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+		 (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) ))
+     #\/
+     (:register (:GREEDY-REPETITION 1 NIL :DIGIT-CLASS)))))
 
-(defvar *ip-scanner*
+(defparameter *ip-scanner*
   (ppcre:create-scanner
    '(:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
      (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
      (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
      (:GREEDY-REPETITION 1 3 :DIGIT-CLASS))))
-  
+
+
 (defun dotted->vector (str)
   "Take a number in dotted notation and return a vector representation."
   (declare (type string str))
   (trivia:match
       str
-    ((trivia.ppcre:ppcre (*ip-cidr-scanner*) ip)
+    ((trivia.ppcre:ppcre (*ip-cidr-scanner*) ip _)
      ;; 172.21.18.6/24
      (dotted->vector ip))
     ((trivia.ppcre:ppcre (*ip-scanner*))
@@ -93,8 +102,7 @@ machine that is running the computation"
 
 (defun dotted->list (str)
   (declare (type string str))
-  (loop :for num string in (split-sequence #\. str)
-     :collect  (parse-integer num) )
+  (coerce (dotted->vector str) 'list)
   )
 
 (defun parse-dotted (str)
