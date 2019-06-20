@@ -125,42 +125,31 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
      )
   )
 
-(defun octets-needed (num)
-  (cond
-    ((= num 0) 1)
-    (t
-     (loop
-	:for i integer :from 0
-	:while (> num 0)
-	:do (setf num (ash num -8))
-	:finally (return-from octets-needed i)))))
-
-(defun _num->octets (num &key length)
+(defun hostnum->octets (num &key (num-octets 4))
   "Takes a lisp number (machine) and turns it into an octet vector in big-endian"
-  (let* ((slen (cond
-		 (length length)
-		 (t (octets-needed num))))
+  (let* ((slen num-octets)
 	 (seq (make-array slen)))
-    (loop :for i integer from 0
-       :while (> num  0)
+    (loop :for i integer from 0 below slen
+       ;;:while (> num  0)
        :do
-       (setf (elt seq (- slen i 1)) (ldb (byte 8 0) num))
-       (setf num (ash num -8)) ;; shift right
+       (setf (elt seq (- slen i 1)) (ldb (byte 8 (* 8 i)) num))
+       ;;(setf num (ash num -8)) ;; shift right
        )
     seq)
   )
+
     
-(defun num->octets (num &key (endian :big-endian) length)
+(defun num->octets (num &key (endian :big-endian) (length 4))
   ;; (num->octets 259) => #(0 0 1 3)
   ;; (num->octets 256 :endian :little) => #(3 1 0 0)
   ;; Defaults to network byte order
   "Takes a number and returns that number as a list of octets in either big or little endian"
   (ecase endian
     ((:big-endian :network :big :b :n :net)
-     (_num->octets num :length length)
+     (hostnum->octets num :num-octets length)
      )
     ((:little-endian :little :l)
-     (reverse (_num->octets num :length length))
+     (reverse (hostnum->octets num :num-octets length))
      )
     ))
 
@@ -337,13 +326,6 @@ actual parsing.  See also: hexstring->octets, parse-integer"
        )
     ))
 
-(defmacro gen-hostu->net (name num-octets)
-  (let ((function-name (intern (string-upcase (format nil "host~au->net" (* 8 num-octets))))))
-    `(defmethod ,function-name ((obj integer))
-       (_num->octets obj ,num-octets)
-       )
-    )
-  )
 
 (defmacro defnumrw (num-octets)
   (cons
@@ -352,7 +334,6 @@ actual parsing.  See also: hexstring->octets, parse-integer"
       :while (<= i num-octets)
       :collect (let ((intdef (intern (string-upcase (format nil "uint~a" (* 8 i))))))
 		 `(progn
-		    (gen-hostu->net ,intdef ,i)
 		    (gen-num-reader ,intdef ,i)
 		    (gen-num-writers ,intdef ,i)))
       :do (setf i (* i 2))

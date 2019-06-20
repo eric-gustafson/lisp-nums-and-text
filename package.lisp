@@ -18,7 +18,8 @@
    :num->dotted
 
    :octets-needed
-   
+
+   :hostnum->octets
    :hexstring->octets
    :parse-machine-hex
 
@@ -33,10 +34,6 @@
    :nbo-hex-string
    :nbo-octet->nbo-integer
 
-   :host8u->net
-   :host16u->net
-   :host32u->net
-   :host64u->net
    
    :read-uint8
    :write-uint8
