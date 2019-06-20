@@ -51,6 +51,7 @@ machine that is running the computation"
     )
   )
 
+;; Can the name be WORSE?  Makes me thing network address, like big endian
 (defun na->list (n)
   ;; Takes a native integer fixnum, like from a packet sniffer
   (loop for i from 0 upto 3
@@ -321,6 +322,7 @@ actual parsing.  See also: hexstring->octets, parse-integer"
   )
 
 (defmacro gen-num-reader (name num-octets)
+  
   (let ((function-name (intern (string-upcase (format nil "read-~a" name))))
 	)
     `(progn
@@ -335,6 +337,14 @@ actual parsing.  See also: hexstring->octets, parse-integer"
        )
     ))
 
+(defmacro gen-hostu->net (name num-octets)
+  (let ((function-name (intern (string-upcase (format nil "host~au->net" (* 8 num-octets))))))
+    `(defmethod ,function-name ((obj integer))
+       (_num->octets obj ,num-octets)
+       )
+    )
+  )
+
 (defmacro defnumrw (num-octets)
   (cons
    'progn
@@ -342,6 +352,7 @@ actual parsing.  See also: hexstring->octets, parse-integer"
       :while (<= i num-octets)
       :collect (let ((intdef (intern (string-upcase (format nil "uint~a" (* 8 i))))))
 		 `(progn
+		    (gen-hostu->net ,intdef ,i)
 		    (gen-num-reader ,intdef ,i)
 		    (gen-num-writers ,intdef ,i)))
       :do (setf i (* i 2))
