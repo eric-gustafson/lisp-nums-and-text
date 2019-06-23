@@ -162,7 +162,7 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     )
   )
 
-(defun num->dotted (num &key length)
+(defun num->dotted (num &key (length 4))
   (format nil "~{~a~^.~}" (coerce (num->octets num :length length) 'list))
   )
 
