@@ -19,7 +19,7 @@ machine that is running the computation"
 
 (defmethod addr->dotted ((obj list))
   "Convert the address into dotted string"
-  (format nil "~{~a.~}" obj)  
+  (format nil "~{~A~^.~}" obj)  
   )
 
 (defmethod addr->dotted ((obj vector))
