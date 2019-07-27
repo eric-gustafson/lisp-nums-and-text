@@ -19,7 +19,7 @@ machine that is running the computation"
 
 (defmethod addr->dotted ((obj list))
   "Convert the address into dotted string"
-  (format nil "~{~a.~}" obj)  
+  (format nil "~{~A~^.~}" obj)  
   )
 
 (defmethod addr->dotted ((obj vector))
@@ -31,6 +31,9 @@ machine that is running the computation"
 	 :when (> i 0) :do (princ ".")
 	 :do (princ (elt obj i)))
       )))
+
+(defmethod addr->dotted ((obj number))
+  (addr->dotted (num->octets obj)))
 
 (defun print-ipaddr (obj stream)
   ;; only handles ipv4 at the moment
@@ -48,25 +51,59 @@ machine that is running the computation"
     )
   )
 
+;; Can the name be WORSE?  Makes me thing network address, like big endian
 (defun na->list (n)
   ;; Takes a native integer fixnum, like from a packet sniffer
   (loop for i from 0 upto 3
      collect (ldb (byte 8 (* 8 i)) n)))
 
+(defun make-cidr-mask (ncidr-bits)
+  (loop
+     :with mask = #x80000000
+     :repeat (- ncidr-bits 1)
+     :do
+     (setf mask (logior mask (ash mask -1)))
+     :finally (return mask)))
+
+(defparameter *ip-cidr-scanner*
+  (ppcre:create-scanner
+   '(:sequence
+     (:register (:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+		 (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+		 (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+		 (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) ))
+     #\/
+     (:register (:GREEDY-REPETITION 1 NIL :DIGIT-CLASS)))))
+
+(defparameter *ip-scanner*
+  (ppcre:create-scanner
+   '(:SEQUENCE (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
+     (:GREEDY-REPETITION 1 3 :DIGIT-CLASS))))
+
+
 (defun dotted->vector (str)
   "Take a number in dotted notation and return a vector representation."
   (declare (type string str))
-  (let ((v (serapeum:vect)))
-    (loop :for num string in (split-sequence #\. str)
-       :do (vector-push-extend  (parse-integer num) v))
-    v
+  (trivia:match
+      str
+    ((trivia.ppcre:ppcre (*ip-cidr-scanner*) ip _)
+     ;; 172.21.18.6/24
+     (dotted->vector ip))
+    ((trivia.ppcre:ppcre (*ip-scanner*))
+     (let ((v (serapeum:vect)))
+       (loop :for num string in (split-sequence #\. str)
+	  :do (vector-push-extend  (parse-integer num) v))
+       v
+       )
+     )
     )
   )
 
 (defun dotted->list (str)
   (declare (type string str))
-  (loop :for num string in (split-sequence #\. str)
-     :collect  (parse-integer num) )
+  (coerce (dotted->vector str) 'list)
   )
 
 (defun parse-dotted (str)
@@ -88,42 +125,31 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
      )
   )
 
-(defun octets-needed (num)
-  (cond
-    ((= num 0) 1)
-    (t
-     (loop
-	:for i integer :from 0
-	:while (> num 0)
-	:do (setf num (ash num -8))
-	:finally (return-from octets-needed i)))))
-
-(defun _num->octets (num &key length)
+(defun hostnum->octets (num &key (num-octets 4))
   "Takes a lisp number (machine) and turns it into an octet vector in big-endian"
-  (let* ((slen (cond
-		 (length length)
-		 (t (octets-needed num))))
+  (let* ((slen num-octets)
 	 (seq (make-array slen)))
-    (loop :for i integer from 0
-       :while (> num  0)
+    (loop :for i integer from 0 below slen
+       ;;:while (> num  0)
        :do
-       (setf (elt seq (- slen i 1)) (ldb (byte 8 0) num))
-       (setf num (ash num -8)) ;; shift right
+       (setf (elt seq (- slen i 1)) (ldb (byte 8 (* 8 i)) num))
+       ;;(setf num (ash num -8)) ;; shift right
        )
     seq)
   )
+
     
-(defun num->octets (num &key (endian :big-endian) length)
+(defun num->octets (num &key (endian :big-endian) (length 4))
   ;; (num->octets 259) => #(0 0 1 3)
   ;; (num->octets 256 :endian :little) => #(3 1 0 0)
   ;; Defaults to network byte order
   "Takes a number and returns that number as a list of octets in either big or little endian"
   (ecase endian
     ((:big-endian :network :big :b :n :net)
-     (_num->octets num :length length)
+     (hostnum->octets num :num-octets length)
      )
     ((:little-endian :little :l)
-     (reverse (_num->octets num :length length))
+     (reverse (hostnum->octets num :num-octets length))
      )
     ))
 
@@ -136,7 +162,7 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     )
   )
 
-(defun num->dotted (num &key length)
+(defun num->dotted (num &key (length 4))
   (format nil "~{~a~^.~}" (coerce (num->octets num :length length) 'list))
   )
 
@@ -285,6 +311,7 @@ actual parsing.  See also: hexstring->octets, parse-integer"
   )
 
 (defmacro gen-num-reader (name num-octets)
+  
   (let ((function-name (intern (string-upcase (format nil "read-~a" name))))
 	)
     `(progn
@@ -298,6 +325,7 @@ actual parsing.  See also: hexstring->octets, parse-integer"
 		   (subseq seq ,num-octets))))
        )
     ))
+
 
 (defmacro defnumrw (num-octets)
   (cons

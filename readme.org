@@ -1,11 +1,11 @@
-#+title: Lisp - Numbers and Text
+#+title: NumEx - Numerical Exchange
 #+author: Eric Gustafson
 
 * Goal
 
   To create a package that will make it easy to convert between
-  numerical objects and textual representations of those objects in
-  common lisp, mostly dotted strings such as 172.21.18.1 and hex 
+  numerical objects and textual representations of those objects with
+  a common lisp system, mostly dotted strings such as 172.21.18.1 and hex 
   output as found in /proc.
 
   I'm using this package to work with numbers comming from a

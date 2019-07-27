@@ -2,7 +2,8 @@
 (defpackage #:numex
   (:shadowing-import-from #:trivia @)
   (:use #:cl #:alexandria #:serapeum
-	#:trivia)
+	#:trivia
+	)
   (:export
    
    :fixnum-info
@@ -17,7 +18,8 @@
    :num->dotted
 
    :octets-needed
-   
+
+   :hostnum->octets
    :hexstring->octets
    :parse-machine-hex
 
@@ -32,6 +34,7 @@
    :nbo-hex-string
    :nbo-octet->nbo-integer
 
+   
    :read-uint8
    :write-uint8
    :write-uint16
@@ -41,5 +44,9 @@
    :read-uint16
    :read-uint32
    :read-uint64
+
+   :*ip-cidr-scanner*
+   :*ip-scanner*
+   :make-cidr-mask
    )
   )
