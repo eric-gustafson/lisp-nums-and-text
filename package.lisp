@@ -26,6 +26,8 @@
    :private-a?
 
    :octets->num
+   :seq->num
+   
    :num->octets
    :read-octets
 

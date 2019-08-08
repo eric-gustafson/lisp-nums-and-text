@@ -230,6 +230,9 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     )
   )
 
+(defun seq->num (seq &key (endian :big-endian))
+  (octets->num seq :endian endian))
+
 (defun string->octet-list (str)
   (declare (type string str))
   (let* ((len (length str)))
