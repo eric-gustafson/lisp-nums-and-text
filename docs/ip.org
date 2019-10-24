@@ -1,13 +1,42 @@
 #+title: ip.lisp documentation and testing
 #+startup: overview
 
+* TODO work
+  - [ ] (cidr-net-inc ipnum cidr inc)
+    Takes an ip address and returns the next highest net.
+
+    - [ ] implement function
+
+    - [ ] make a unit test and an org-mode example
+
+  - [ ] (cidr-addresses ipnum cidr) 
+    Returns a list of all of the addresses
+
+    - [ ] (cidr-address-range ipnum cidr)
+      Returns a cons of first, last.
+
+    - [ ] Prove *NO*:  Is it always (1 . n)?  If so, then.
+      Try a counter example with /30
+
+  - [ ] ->dotted family output
+    010.000.001.001 vs. 10.0.1.1 
+
+  - [X] (cidr-net ipnum cidr) -> ipnum
+
+  - [X] standardize naming for addr->
+    - [X] addr->dotted
+    - [X] addr->num 
+
+
 * Summary 
+
 ** Keyword Summary
    
    dotted *hw-numerical-type* parse-ip  
 
+
 ** Executive Summary
-   Lot's of protocols are not 4 octets or 8 octets, so we are 
+   Lots of protocols are not 4 octets or 8 octets, so we are 
    implementing such that we don't care about size
 
 
@@ -34,6 +63,110 @@
 
 * Use Cases
 
+** CIDR Operators
+
+*** cidr obj
+    #+begin_src lisp
+      (defparameter *address* (->num #(10 5 23 0)))
+    #+end_src
+
+    #+RESULTS:
+    : *ADDRESS*
+
+*** make-cidr-mask
+
+   #+begin_src lisp :colnames `("cidr" "# addresses" "#hosts" "Decimal" "Hex" "cnet#" "Max addr" "bcast")
+     (loop
+	:for cn :from 32 downto 2
+	:for mask = (make-cidr-mask cn)
+	:collect
+	(list cn
+	      (cidr-num-addresses cn) (cidr-num-hosts cn)
+	      (addr->dotted mask) (format nil "~x" mask)
+	      (cidr-cnet cn)
+	      (cidr-max-addr cn) (cidr-bcast-addr cn)
+	      )
+	)
+   #+end_src
+
+   #+RESULTS:
+   | cidr | # addresses |     #hosts |         Decimal | Hex      | cnet# |   Max addr |      bcast |
+   |------+-------------+------------+-----------------+----------+-------+------------+------------|
+   |   32 |           1 |         -1 | 255.255.255.255 | FFFFFFFF |     1 |         -1 |          0 |
+   |   31 |           2 |          0 | 255.255.255.254 | FFFFFFFE |     1 |          0 |          1 |
+   |   30 |           4 |          2 | 255.255.255.252 | FFFFFFFC |     1 |          2 |          3 |
+   |   29 |           8 |          6 | 255.255.255.248 | FFFFFFF8 |     1 |          6 |          7 |
+   |   28 |          16 |         14 | 255.255.255.240 | FFFFFFF0 |     1 |         14 |         15 |
+   |   27 |          32 |         30 | 255.255.255.224 | FFFFFFE0 |     1 |         30 |         31 |
+   |   26 |          64 |         62 | 255.255.255.192 | FFFFFFC0 |     1 |         62 |         63 |
+   |   25 |         128 |        126 | 255.255.255.128 | FFFFFF80 |     1 |        126 |        127 |
+   |   24 |         256 |        254 | 255.255.255.000 | FFFFFF00 |     1 |        254 |        255 |
+   |   23 |         512 |        510 | 255.255.254.000 | FFFFFE00 |     1 |        510 |        511 |
+   |   22 |        1024 |       1022 | 255.255.252.000 | FFFFFC00 |     1 |       1022 |       1023 |
+   |   21 |        2048 |       2046 | 255.255.248.000 | FFFFF800 |     1 |       2046 |       2047 |
+   |   20 |        4096 |       4094 | 255.255.240.000 | FFFFF000 |     1 |       4094 |       4095 |
+   |   19 |        8192 |       8190 | 255.255.224.000 | FFFFE000 |     1 |       8190 |       8191 |
+   |   18 |       16384 |      16382 | 255.255.192.000 | FFFFC000 |     1 |      16382 |      16383 |
+   |   17 |       32768 |      32766 | 255.255.128.000 | FFFF8000 |     1 |      32766 |      32767 |
+   |   16 |       65536 |      65534 | 255.255.000.000 | FFFF0000 |     1 |      65534 |      65535 |
+   |   15 |      131072 |     131070 | 255.254.000.000 | FFFE0000 |     1 |     131070 |     131071 |
+   |   14 |      262144 |     262142 | 255.252.000.000 | FFFC0000 |     1 |     262142 |     262143 |
+   |   13 |      524288 |     524286 | 255.248.000.000 | FFF80000 |     1 |     524286 |     524287 |
+   |   12 |     1048576 |    1048574 | 255.240.000.000 | FFF00000 |     1 |    1048574 |    1048575 |
+   |   11 |     2097152 |    2097150 | 255.224.000.000 | FFE00000 |     1 |    2097150 |    2097151 |
+   |   10 |     4194304 |    4194302 | 255.192.000.000 | FFC00000 |     1 |    4194302 |    4194303 |
+   |    9 |     8388608 |    8388606 | 255.128.000.000 | FF800000 |     1 |    8388606 |    8388607 |
+   |    8 |    16777216 |   16777214 | 255.000.000.000 | FF000000 |     1 |   16777214 |   16777215 |
+   |    7 |    33554432 |   33554430 | 254.000.000.000 | FE000000 |     1 |   33554430 |   33554431 |
+   |    6 |    67108864 |   67108862 | 252.000.000.000 | FC000000 |     1 |   67108862 |   67108863 |
+   |    5 |   134217728 |  134217726 | 248.000.000.000 | F8000000 |     1 |  134217726 |  134217727 |
+   |    4 |   268435456 |  268435454 | 240.000.000.000 | F0000000 |     1 |  268435454 |  268435455 |
+   |    3 |   536870912 |  536870910 | 224.000.000.000 | E0000000 |     1 |  536870910 |  536870911 |
+   |    2 |  1073741824 | 1073741822 | 192.000.000.000 | C0000000 |     1 | 1073741822 | 1073741823 |
+
+
+*** Get the network portion from an address
+    #+begin_src lisp 
+    (->dotted (cidr-net *address* 24))
+    #+end_src
+
+    #+RESULTS:
+    : 010.005.023.000
+
+*** Iterate through the first 10 networks after this one, for the cidr
+    #+begin_src lisp :results list
+      (let ((itr (cidr-net-increment  30)))
+	(loop
+         :repeat 10
+	 :for i :from itr :by itr
+	 :collect (->dotted i))
+	)
+    #+end_src
+
+    #+RESULTS:
+    - 000.000.000.004
+    - 000.000.000.008
+    - 000.000.000.012
+    - 000.000.000.016
+    - 000.000.000.020
+    - 000.000.000.024
+    - 000.000.000.028
+    - 000.000.000.032
+    - 000.000.000.036
+    - 000.000.000.040
+
+
+*** cidr-addresses
+    #+begin_src lisp :results list
+    (mapcar #'->dotted (cidr-addresses #(10 5 1 5) 30))
+    #+end_src
+
+    #+RESULTS:
+    - 010.005.001.000
+    - 010.005.001.001
+    - 010.005.001.002
+    - 010.005.001.003
+
 **  Parse a string IP address and increment the last octet.
 
 
@@ -45,6 +178,7 @@
 #+RESULTS:
 : 0.0.0.1
 
+
 ** Read in a dotted into a number. Inc it and then print it out
 #+BEGIN_SRC lisp
   (let ((v (dotted->num "1.2.3.33")))
@@ -55,7 +189,10 @@
 #+RESULTS:
 : 1.2.3.34
 
+
+
 * Tests
+
 ** Parsing IP Addresses
 
 #+name: google-name-server
@@ -76,6 +213,21 @@
 
 #+RESULTS:
 | 1 | 2 | 3 | 4 |
+
+
+** Incf network
+#+begin_src lisp
+  (defun octet-incnet (a net)
+  
+
+  (let ((v (octets->num #(1 2 3 4)))
+	(net #(0 0 255 0)))
+    (incnet v net)
+    v)
+
+#+end_src
+
+
 
 
 * Development
@@ -112,3 +264,20 @@ also handle any errors from the dns resolver."
 #+END_SRC
 
 
+
+* Private Networks
+
+#+BEGIN_SRC lisp
+  (let ((ip (first-ip *privnet-a*)))
+    (incf ip)
+    (num->octets ip)
+   )
+#+END_SRC
+
+#+RESULTS:
+| 10 | 0 | 0 | 1 |
+
+
+
+** pnet-class
+   Returns :a :b :c, or maybe ip-net object?

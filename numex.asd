@@ -14,5 +14,8 @@
 	       #:closer-mop)
   :serial t
   :components ((:file "package")
-	       (:file "ip"))
+	       (:file "cidr")
+	       (:file "ip")
+	       (:file "pnets")
+	       )
   )

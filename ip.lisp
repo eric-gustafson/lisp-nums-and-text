@@ -17,23 +17,26 @@ machine that is running the computation"
   that is doing the computation."
   )
 
-(defmethod addr->dotted ((obj list))
+(defmethod ->dotted ((obj list))
   "Convert the address into dotted string"
-  (format nil "~{~A~^.~}" obj)  
+  (format nil "~{~3,'0d~^.~}" obj)  
   )
 
-(defmethod addr->dotted ((obj vector))
+(defmethod ->dotted ((obj vector))
   "Convert the address into dotted string"
-  (let ((n (length obj)))
-    (with-output-to-string
-	(*standard-output*)
-      (loop :for i :below n 
-	 :when (> i 0) :do (princ ".")
-	 :do (princ (elt obj i)))
-      )))
+   (->dotted (coerce obj 'list))
+  )
 
-(defmethod addr->dotted ((obj number))
-  (addr->dotted (num->octets obj)))
+(defun num->dotted (num &key (length 4))
+  (format nil "~{~3,'0d~^.~}" (coerce (num->octets num :length length) 'list))
+  )
+
+(defmethod ->dotted ((obj number))
+  (->dotted (num->octets obj))
+  )
+
+(defmethod ->dotted ((obj string))
+  obj)
 
 (defun print-ipaddr (obj stream)
   ;; only handles ipv4 at the moment
@@ -56,14 +59,6 @@ machine that is running the computation"
   ;; Takes a native integer fixnum, like from a packet sniffer
   (loop for i from 0 upto 3
      collect (ldb (byte 8 (* 8 i)) n)))
-
-(defun make-cidr-mask (ncidr-bits)
-  (loop
-     :with mask = #x80000000
-     :repeat (- ncidr-bits 1)
-     :do
-     (setf mask (logior mask (ash mask -1)))
-     :finally (return mask)))
 
 (defparameter *ip-cidr-scanner*
   (ppcre:create-scanner
@@ -160,10 +155,6 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 	 (parse-integer hstr :radix 16))
      (serapeum:batches (delete-if #'(lambda(c) (find c (vector #\:))) ours) 2))
     )
-  )
-
-(defun num->dotted (num &key (length 4))
-  (format nil "~{~a~^.~}" (coerce (num->octets num :length length) 'list))
   )
 
 (defun nbo-octet->nbo-integer (octet-lst)
@@ -279,26 +270,6 @@ actual parsing.  See also: hexstring->octets, parse-integer"
   )
 
 
-(defvar *a-start* (octets->num '(10 0 0 0)))
-(defvar *a-end*   (octets->num '(10 255 255 255)))
-
-;; A	10.0.0.0 to 10.255.255.255	255.0.0.0
-;; B	172.16.0.0 to 172.31.255.255	255.240.0.0
-;; C	192.168.0.0 to 192.168.255.255	255.255.0.0
-
-(defun private-a? (ipaddr)
-  "Is the IP address a private A?"
-  (trivia:match
-      ipaddr
-    ((guard x (numberp x))
-     (and (>= ipaddr *a-start*)
-	  (<= ipaddr *a-end*)))
-    ((guard x (or (list x) (vector x)))
-     (private-a? (octets->num x)))
-    (otherwise
-     (error "Unexpected parameter ~a" ipaddr)))
-  )
-
 (defun read-octets (n stream)
   (loop :for i :below n :collect (read-byte stream)))
 
@@ -346,4 +317,11 @@ actual parsing.  See also: hexstring->octets, parse-integer"
 
 (defnumrw 8)
   
+(defmethod ->num ((obj string))
+  (dotted->num obj))
 
+(defmethod ->num ((obj sequence))
+  (seq->num obj))
+
+(defmethod ->num ((obj number))
+  obj)

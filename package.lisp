@@ -50,5 +50,11 @@
    :*ip-cidr-scanner*
    :*ip-scanner*
    :make-cidr-mask
+   :ip&cidr->net
+
+   :ip-net
+   :first-ip :last-ip
+   :netmask-bits
+   :address-bits
    )
   )
