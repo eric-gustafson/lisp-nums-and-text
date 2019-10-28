@@ -156,16 +156,22 @@
     - 000.000.000.040
 
 
+*** cidr-nets
+    #+begin_src lisp :results list
+    (mapcare #'->dotted (cidr-nets #(10 0 0 0) 16))
+    #+end_src
+
+
 *** cidr-addresses
     #+begin_src lisp :results list
     (mapcar #'->dotted (cidr-addresses #(10 5 1 5) 30))
     #+end_src
 
     #+RESULTS:
-    - 010.005.001.000
-    - 010.005.001.001
-    - 010.005.001.002
-    - 010.005.001.003
+    - 010.005.001.004
+    - 010.005.001.005
+    - 010.005.001.006
+    - 010.005.001.007
 
 **  Parse a string IP address and increment the last octet.
 

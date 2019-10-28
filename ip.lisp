@@ -19,7 +19,10 @@ machine that is running the computation"
 
 (defmethod ->dotted ((obj list))
   "Convert the address into dotted string"
-  (format nil "~{~3,'0d~^.~}" obj)  
+  (format nil
+	  ;;;"~{~3,'0d~^.~}"
+	  "~{~d~^.~}"
+	  obj)  
   )
 
 (defmethod ->dotted ((obj vector))
@@ -28,7 +31,10 @@ machine that is running the computation"
   )
 
 (defun num->dotted (num &key (length 4))
-  (format nil "~{~3,'0d~^.~}" (coerce (num->octets num :length length) 'list))
+  (format nil
+	  ;;"~{~3,'0d~^.~}"
+	  "~{~3d~^.~}"
+	  (coerce (num->octets num :length length) 'list))
   )
 
 (defmethod ->dotted ((obj number))

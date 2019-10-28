@@ -13,6 +13,7 @@
    :parse-dotted
 
    :addr->dotted
+   :->dotted
    
    :dotted->num
    :num->dotted
@@ -50,11 +51,12 @@
    :*ip-cidr-scanner*
    :*ip-scanner*
    :make-cidr-mask
-   :ip&cidr->net
+   :ip-cidr->net
 
    :ip-net
    :first-ip :last-ip
    :netmask-bits
    :address-bits
+   :cidr-subnets
    )
   )
