@@ -45,7 +45,6 @@
   (eq (cidr-net addrA cidr) (cidr-net addrB cidr)))
 
 
-
 #+nil(defmethod ip-cidr->net (address (cidr integer))
   (assert (and (> cidr 0)
 	       (<= cidr 32)))
