@@ -35,6 +35,12 @@
     (logand #xffffffff cm ipn))
   )
 
+(defmethod cidr-bcast (address (cidr integer))
+  (assert (and (> cidr 0)  (<= cidr 32)))  
+  (let ((ipn (->num  address))
+	(cm (make-cidr-mask cidr)))
+    (logor ipn (lognot cm))))
+  
 (defmethod cidr-net-eq? (addrA addrB (cidr integer))
   (eq (cidr-net addrA cidr) (cidr-net addrB cidr)))
 

@@ -58,5 +58,7 @@
    :netmask-bits
    :address-bits
    :cidr-subnets
+   :cidr-net
+   :cidr-bcast
    )
   )
