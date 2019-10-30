@@ -33,7 +33,7 @@ machine that is running the computation"
 (defun num->dotted (num &key (length 4))
   (format nil
 	  ;;"~{~3,'0d~^.~}"
-	  "~{~3d~^.~}"
+	  "~{~d~^.~}"
 	  (coerce (num->octets num :length length) 'list))
   )
 
