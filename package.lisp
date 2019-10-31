@@ -28,7 +28,7 @@
 
    :octets->num
    :seq->num
-   
+   :->num 
    :num->octets
    :read-octets
 
