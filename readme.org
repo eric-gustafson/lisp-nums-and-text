@@ -32,7 +32,7 @@
   (trivia:match
       (numex:dotted->vector "1.2.3.4")
     ((vector a b c d)
-     (numex:addr->dotted (vector a b c (+ d 1)))))
+     (numex:->dotted (vector a b c (+ d 1)))))
 #+END_SRC
 
 #+RESULTS:

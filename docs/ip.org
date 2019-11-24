@@ -21,12 +21,6 @@
   - [ ] ->dotted family output
     010.000.001.001 vs. 10.0.1.1 
 
-  - [X] (cidr-net ipnum cidr) -> ipnum
-
-  - [X] standardize naming for addr->
-    - [X] addr->dotted
-    - [X] addr->num 
-
 
 * Summary 
 
@@ -82,7 +76,7 @@
 	:collect
 	(list cn
 	      (cidr-num-addresses cn) (cidr-num-hosts cn)
-	      (addr->dotted mask) (format nil "~x" mask)
+	      (->dotted mask) (format nil "~x" mask)
 	      (cidr-cnet cn)
 	      (cidr-max-addr cn) (cidr-bcast-addr cn)
 	      )
