@@ -12,7 +12,6 @@
    :dotted->list
    :parse-dotted
 
-   :addr->dotted
    :->dotted
    
    :dotted->num
