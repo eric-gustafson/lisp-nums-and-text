@@ -2,7 +2,7 @@
 (defpackage #:numex
   (:shadowing-import-from #:trivia @)
   (:use #:cl #:alexandria #:serapeum
-	#:trivia
+	#:trivia #:cffi
 	)
   (:export
    
@@ -34,6 +34,7 @@
    :string->octet-list
    
    :nbo-hex-string
+   :octet-list->hexstr
    :nbo-octet->nbo-integer
 
    

@@ -126,7 +126,8 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
      )
   )
 
-(defun hostnum->octets (num &key (num-octets 4))
+
+#+nil(defun hostnum->octets (num &key (num-octets 4))
   "Takes a lisp number (machine) and turns it into an octet vector in big-endian"
   (let* ((slen num-octets)
 	 (seq (make-array slen)))
@@ -139,20 +140,39 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     seq)
   )
 
-    
+(defun bele (k)
+  "returns either :big or :little endian"
+  (ecase
+      k
+    ((:big-endian :network :big :b :n :net) :be)
+    ((:little-endian :little :l) :le)))    
+
+
+
 (defun num->octets (num &key (endian :big-endian) (length 4))
-  ;; (num->octets 259) => #(0 0 1 3)
-  ;; (num->octets 256 :endian :little) => #(3 1 0 0)
-  ;; Defaults to network byte order
-  "Takes a number and returns that number as a list of octets in either big or little endian"
-  (ecase endian
-    ((:big-endian :network :big :b :n :net)
-     (hostnum->octets num :num-octets length)
-     )
-    ((:little-endian :little :l)
-     (reverse (hostnum->octets num :num-octets length))
-     )
-    ))
+  "Takes a number and returns that number as a list of octets in either big or little endian/
+	| answer | number (machine) | todo    |
+	|--------+------------------+---------|
+	| :be    | :be              | nothing |
+	| :be    | :le              | reverse |
+	| :le    | :be              | reverse |
+	| :le    | :le              | nothing |
+"
+  (let* ((nbo (bele endian))
+	 (machine-rep #+(or big-endian) :be
+		      #-(or big-endian) :le)
+	 (slen length)
+	 (seq (make-array slen)))
+    (loop :for i integer from 0 below slen
+       :do
+	 (setf (elt seq i) (ldb (byte 8 (* 8 i)) num))
+       ;;(setf num (ash num -8)) ;; shift right
+	 )
+    (if (eq nbo machine-rep)
+	seq
+	(reverse seq))
+    )
+  )
 
 (defun hexstring->octets (str)
   (let ((ours (copy-sequence 'string str)))
