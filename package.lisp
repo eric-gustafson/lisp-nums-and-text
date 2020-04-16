@@ -35,6 +35,8 @@
    
    :nbo-hex-string
    :octet-list->hexstr
+   :octet-list->hexstr/colons
+   
    :nbo-octet->nbo-integer
 
    

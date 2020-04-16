@@ -269,6 +269,16 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
       (format *standard-output* "~2,'0x" o)
       )))
 
+(defun octet-list->hexstr/colons (addr)
+  "Send in any sequence of octets, and this returns a hex string"
+  (with-output-to-string
+      (*standard-output*)
+    (loop :for  (item . rest) :on addr
+	 :do
+	 (format *standard-output* "~2,'0x" item)
+	 :when rest :do (format t ":"))
+    ))
+
 (defun seq-octstr->nums (str-seq)
   (let ((return-value (copy-seq str-seq)))
     (map-into
