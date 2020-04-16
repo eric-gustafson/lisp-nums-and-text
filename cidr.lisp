@@ -64,18 +64,26 @@
 
 ;; (cidr-subnets #(10 0 0 0) 16 24)
 ;;   -> 10.0.0.0 10.0.1.0 10.0.2.0 ...
-(defmethod cidr-subnets (addr cidr-net cidr-subnet)
-  "Break out a smaller subset of networks from the bigger network"
-  (let ((net (cidr-net addr cidr-net))
-	(nets (expt 2 (- cidr-subnet cidr-net)))
-	(itr (cidr-net-increment 24)))
-    (loop
-       :for i :from (cidr-net addr cidr-net) :by itr
-       :while (cidr-net-eq? addr i cidr-net)
-       :collect i)
+(defun cidr-subnets (addr cidr-net &key n)
+  "Returns a list of IP address as a machine number"
+  (let* (
+	 (cidr-subnet (- 32 cidr-net))
+	 (itr (cidr-net-increment cidr-net))
+	 )
+    (cond
+      ((numberp n)
+       (loop
+	  :for a :from 0 :below n
+	  :for i :from (cidr-net addr cidr-net) :by itr
+	  :collect i))
+      (t
+       (loop
+	  :for i :from (cidr-net addr cidr-net) :by itr
+	  :collect i))
+      )
     )
   )
-    
+
 (defmethod cidr-num-addresses ((cidr integer))
   "Returns how many addresses are in the cidr"
   (assert (and (> cidr 0)	       (<= cidr 32)))

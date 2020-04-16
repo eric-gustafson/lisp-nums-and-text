@@ -60,5 +60,6 @@
    :cidr-subnets
    :cidr-net
    :cidr-bcast
+   :cidr-net-increment
    )
   )

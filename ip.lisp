@@ -31,6 +31,8 @@ machine that is running the computation"
   )
 
 (defun num->dotted (num &key (length 4))
+  "Converts a machine number representing an IP address into a dotted
+string"
   (format nil
 	  ;;"~{~3,'0d~^.~}"
 	  "~{~d~^.~}"
@@ -148,8 +150,7 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     ((:little-endian :little :l) :le)))    
 
 
-
-(defun num->octets (num &key (endian :big-endian) (length 4))
+(defun num->octets (num &key (octets-endian :big-endian) (length 4))
   "Takes a number and returns that number as a list of octets in either big or little endian/
 	| answer | number (machine) | todo    |
 	|--------+------------------+---------|
@@ -158,7 +159,7 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 	| :le    | :be              | reverse |
 	| :le    | :le              | nothing |
 "
-  (let* ((nbo (bele endian))
+  (let* ((nbo (bele octets-endian))
 	 (machine-rep #+(or big-endian) :be
 		      #-(or big-endian) :le)
 	 (slen length)
@@ -233,11 +234,11 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 	  seq
 	  :initial-value 0))
 
-(defun octets->num (oct-seq &key (endian :big-endian))
+(defun octets->num (oct-seq &key (octets-endian :big-endian))
   "Turn a series of octets into a machine number.  The endian keyword parameter describes the endianess of the oct-seq parameter."
   (check-type oct-seq sequence)  
   (ecase
-      endian
+      octets-endian
     ((:big-endian :network :big :b :n :net)
      (_octets->num  oct-seq)
      )
@@ -305,9 +306,9 @@ actual parsing.  See also: hexstring->octets, parse-integer"
 	)
     `(progn
        (defmethod ,seq-write ((num number)   &key (endian *hw-numerical-type*))
-	   (num->octets num :endian endian :length ,num-octets))
+	   (num->octets num :octets-endian endian :length ,num-octets))
        (defmethod ,function-name ((out-stream stream) (num number)  &key (endian *hw-numerical-type*))
-	 (write-sequence (num->octets num :endian endian :length ,num-octets) out-stream))))
+	 (write-sequence (num->octets num :octets-endian endian :length ,num-octets) out-stream))))
   )
 
 (defmacro gen-num-reader (name num-octets)
