@@ -53,7 +53,7 @@ string"
 		 (obj stream :type t)
 	       (format stream "~a.~a.~a.~a" a b c d)
 	       )))
-    (trivia:match
+    (optima:match
 	obj
       ((vector a b c d) (doit a b c d))
       ((list a b c d) (doit a b c d))
@@ -85,16 +85,32 @@ string"
      (:GREEDY-REPETITION 1 3 :DIGIT-CLASS) #\.
      (:GREEDY-REPETITION 1 3 :DIGIT-CLASS))))
 
+#+nil(defparameter *hexstr-scanner*
+  (ppcre:create-scanner
+   '(:greedy-repetition
+     1 nil
+     (:SEQUENCE
+      (:GREEDY-REPETITION 1 2
+       (:CHAR-CLASS (:RANGE #\a #\f) (:RANGE #\A #\F) (:RANGE #\0 #\9)))
+      (:greedy-repetition 0 nil #\:)))))
+
+(defparameter *hexstr-scanner*
+  (ppcre:create-scanner
+   '(:SEQUENCE
+     (:GREEDY-REPETITION 1 2
+      (:CHAR-CLASS (:RANGE #\a #\f) (:RANGE #\A #\F) (:RANGE #\0 #\9)))
+     (:greedy-repetition 0 nil #\:))))
+     
 
 (defun dotted->vector (str)
   "Take a number in dotted notation and return a vector representation."
   (declare (type string str))
-  (trivia:match
+  (optima:match
       str
-    ((trivia.ppcre:ppcre (*ip-cidr-scanner*) ip _)
+    ((optima.ppcre:ppcre *ip-cidr-scanner* ip _)
      ;; 172.21.18.6/24
      (dotted->vector ip))
-    ((trivia.ppcre:ppcre (*ip-scanner*))
+    ((optima.ppcre:ppcre *ip-scanner*)
      (let ((v (serapeum:vect)))
        (loop :for num string in (split-sequence #\. str)
 	  :do (vector-push-extend  (parse-integer num) v))
@@ -176,12 +192,8 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
   )
 
 (defun hexstring->octets (str)
-  (let ((ours (copy-sequence 'string str)))
-    (mapcar
-     #'(lambda(hstr)
-	 (parse-integer hstr :radix 16))
-     (serapeum:batches (delete-if #'(lambda(c) (find c (vector #\:))) ours) 2))
-    )
+  (loop :for str :in (ppcre:all-matches-as-strings *hexstr-scanner* str)
+	:collect (parse-integer (remove #\: str) :radix 16))
   )
 
 (defun nbo-octet->nbo-integer (octet-lst)

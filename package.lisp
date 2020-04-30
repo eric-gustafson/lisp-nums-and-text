@@ -2,7 +2,7 @@
 (defpackage #:numex
   (:shadowing-import-from #:trivia @)
   (:use #:cl #:alexandria #:serapeum
-	#:trivia #:cffi
+	#:optima #:cffi
 	)
   (:export
    
@@ -52,6 +52,8 @@
 
    :*ip-cidr-scanner*
    :*ip-scanner*
+   :*hexstr-scanner*
+
    :make-cidr-mask
    :ip-cidr->net
 

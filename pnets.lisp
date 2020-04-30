@@ -46,7 +46,7 @@
 
 (defun private-a? (ipaddr)
   "Is the IP address a private A?"
-  (trivia:match
+  (optima:match
       ipaddr
     ((guard x (numberp x))
      (and (>= ipaddr *a-start*)
