@@ -29,7 +29,7 @@
   turn it back into dotted.
 
 #+BEGIN_SRC lisp :exports both
-  (trivia:match
+  (optima:match
       (numex:dotted->vector "1.2.3.4")
     ((vector a b c d)
      (numex:->dotted (vector a b c (+ d 1)))))

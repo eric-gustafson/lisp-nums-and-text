@@ -9,8 +9,8 @@
    (#:date . "2019"))
   :depends-on (#:alexandria
 	       #:serapeum
-	       #:trivia
-	       #:trivia.ppcre
+	       #:optima
+	       #:optima.ppcre
 	       #:closer-mop)
   :serial t
   :components ((:file "package")

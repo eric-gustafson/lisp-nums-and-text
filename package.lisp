@@ -1,6 +1,6 @@
 ;;;; Package.lisp 
 (defpackage #:numex
-  (:shadowing-import-from #:trivia @)
+  ;;(:shadowing-import-from #:optima @)
   (:use #:cl #:alexandria #:serapeum
 	#:optima #:cffi
 	)
