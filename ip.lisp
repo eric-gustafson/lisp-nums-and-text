@@ -365,12 +365,18 @@ actual parsing.  See also: hexstring->octets, parse-integer"
   )
 
 (defnumrw 8)
-  
-(defmethod ->num ((obj string))
-  (dotted->num obj))
 
-(defmethod ->num ((obj sequence))
-  (seq->num obj))
+(defgeneric ->num (obj)
+  (:documentation "Turn a dotted ip address, like 127.0.0.1 or a
+  sequences like that, such as #(127 0 0 1) into a machine number. If
+  you pass it a number, then it's returns that number (identity
+  function).")
+  (:method ((obj string))
+    (dotted->num obj))
+  (:method ((obj sequence))
+    (seq->num obj))
+  (:method ((obj number))
+    obj)
+  )
 
-(defmethod ->num ((obj number))
-  obj)
+
