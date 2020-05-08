@@ -46,14 +46,13 @@
 
 (defun private-a? (ipaddr)
   "Is the IP address a private A?"
-  (optima:match
-      ipaddr
-    ((guard x (numberp x))
+  (cond
+    ((numberp ipaddr)
      (and (>= ipaddr *a-start*)
 	  (<= ipaddr *a-end*)))
-    ((guard x (or (list x) (vector x)))
-     (private-a? (octets->num x)))
-    (otherwise
+    ((or (listp ipaddr) (vectorp ipaddr))
+     (private-a? (octets->num ipaddr)))
+    (t
      (error "Unexpected parameter ~a" ipaddr)))
   )
 
