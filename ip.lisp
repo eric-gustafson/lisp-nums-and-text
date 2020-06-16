@@ -380,3 +380,12 @@ actual parsing.  See also: hexstring->octets, parse-integer"
   )
 
 
+(defgeneric ->octets (obj)
+  (:documentation "Turn a thing into a vector that represents an 32 bit IP address in network byte order")
+  (:method ((obj number))
+    (num->octets obj :octets-endian :net))
+  (:method ((obj sequence))
+    (map 'vector #'values obj))
+  )
+
+(export '->octets)
