@@ -291,6 +291,27 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 	 :when rest :do (format t ":"))
     ))
 
+(defun octseq->hexstr (seq)
+  "converts a sequence of octets into a hex string. The numbers in the
+seq are always displayed with left padded 0, so #(0 1) => '00:01'"
+  (let ((port (reduce #'(lambda(port item)
+			  (cond
+			    ((eq 'ccl:string-output-stream (type-of  port))
+			     (format port ":~2,'0x" item)
+			     port
+			     )
+			    (t
+			     (let ((p (make-string-output-stream)))
+			       (format p "~2,'0x" item)
+			       p))))
+		      seq
+		      :initial-value nil
+		      )))
+    (get-output-stream-string  port))
+  )
+
+(export 'octseq->hexstr)
+
 (defun seq-octstr->nums (str-seq)
   (let ((return-value (copy-seq str-seq)))
     (map-into
