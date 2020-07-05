@@ -296,7 +296,7 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
 seq are always displayed with left padded 0, so #(0 1) => '00:01'"
   (let ((port (reduce #'(lambda(port item)
 			  (cond
-			    ((eq 'string-output-stream (type-of  port))
+			    (port
 			     (format port ":~2,'0x" item)
 			     port
 			     )
