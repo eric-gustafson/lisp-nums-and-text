@@ -165,6 +165,19 @@ into a number. x86 is little-endian.  RBPI is usually little-endian."
     ((:big-endian :network :big :b :n :net) :be)
     ((:little-endian :little :l) :le)))    
 
+(defun num->oct-seq (num)
+  "Turns a bignum into a series of octets.  We take the bits off so
+that the sequence (HO .. LO), high-order at the beggining of the list,
+low order at the end.  We start taking off low order bits and we
+terminate when num becomes 0 from taking bits off."
+  (let (result)
+    (loop :while (> num 0) :do
+      (push (ldb (byte 8 0) num) result)
+      (setf num (ash num -8)))
+    result)
+  )
+
+(export 'num->oct-seq)
 
 (defun num->octets (num &key (octets-endian :big-endian) (length 4))
   "Takes a number and returns that number as a list of octets in either big or little endian/
