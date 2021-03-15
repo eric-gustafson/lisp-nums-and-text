@@ -19,7 +19,6 @@
 
   ldb, ash
 
-
 * Example Usage
 
 ** Numbers
